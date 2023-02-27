@@ -13,10 +13,12 @@ app.get("/", (req, res) => {
   </head>
   <body>
     <ul>
-    ${posts.map((post) => `<li>${post.title}</li>`)}
+    ${posts.map((post) => `<li><b>Title: </b>${post.title} <br><b>Author: </b>${post.name}</li>`).join('')}
     </ul>
   </body>
   </html>`;
+
+  res.send(html)
 });
 
 const PORT = 1337;
