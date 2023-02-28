@@ -2,6 +2,8 @@ const express = require("express");
 const morgan = require("morgan");
 const postBank = require("./postBank");
 const app = express();
+app.use(express.static("./public"));
+app.use(morgan("dev"));
 
 app.get("/", (req, res) => {
   const posts = postBank.list();
@@ -37,12 +39,15 @@ app.get("/", (req, res) => {
   res.send(html);
 });
 
-app.get("/posts/:id", (req, res) => {
+app.get("/posts/:id", (req, res, next) => {
   const id = req.params.id;
   const post = postBank.find(id);
   if (!post.id) {
-    throw new Error("Not Found");
-  }
+    next({
+      error: `404 ${+id} does not exist`,
+      message: 'Post ID not found'
+    });
+  }else{
   const html = `<!DOCTYPE html>
     <html>
     <head>
@@ -64,9 +69,14 @@ app.get("/posts/:id", (req, res) => {
     </body>
   </html>`;
   res.send(html);
+}
 });
 
-const PORT = 1337;
+app.use('*', (error,req,res,next)=>{
+  res.status(500).send({error})
+})
+
+const { PORT = 1337 } = process.env;
 
 
 
@@ -75,5 +85,3 @@ app.listen(PORT, () => {
   console.log(`App listening in port ${PORT}`);
 });
 
-app.use(express.static("./public"));
-app.use(morgan("dev"));
